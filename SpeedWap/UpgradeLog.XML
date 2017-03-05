@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="SpeedWS">
+</Property><Property Name="Solution File" Value="D:\Works\SpeedWap\SpeedWS.sln">
+</Property><Property Name="User Options File" Value="D:\Works\SpeedWap\SpeedWS.suo">
+</Property><Property Name="Date" Value="Monday, January 07, 2013">
+</Property><Property Name="Time" Value="17:51 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="SpeedWS.sln" Description="File successfully backed up as D:\Works\SpeedWap\SpeedWS.sln.old">
+</Event><Event ErrorLevel="0" Project="" Source="SpeedWS.suo" Description="File successfully backed up as D:\Works\SpeedWap\SpeedWS.suo.old">
+</Event><Event ErrorLevel="3" Project="SpeedWS" Source="SpeedWS.vcproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="" Source="SpeedWS.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="SpeedWS.sln" Description="Converted">
+</Event></UpgradeLog>

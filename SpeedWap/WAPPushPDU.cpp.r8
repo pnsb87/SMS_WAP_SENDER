@@ -1,0 +1,255 @@
+#include "StdAfx.h"
+#include "WAPPushPDU.h"
+#include "Utils.h"
+#include <time.h>
+
+WAPPushPDU::WAPPushPDU(void)
+{
+}
+int WAPPushPDU::getPDU(std::string dstNumber, std::string url, std::string text, std::string& result)
+{
+	//std::string pdu;
+	CString pdu;
+	
+	int out_len = 0;
+	pdu.Append("004100");//header
+	out_len += 3;
+
+	char hex_data[2];
+	
+	int number_len = 0;
+	std::string bcd_number = Utils::string2BCD(dstNumber, number_len);
+	//Utils::Dec2Hex(number_len, hex_data);*/
+	//pdu.Append(hex_data);
+	pdu.AppendFormat("%02X", number_len);
+	pdu.Append("91"); //Destination is an international telephone number
+	pdu.Append(bcd_number.c_str()); //msisdn number in BCD format
+	pdu.Append("0004");
+
+	//std::string user_data;
+	CString user_data;
+
+	user_data.Append("0B");//User data header length is 11 octets
+	user_data.Append("05");//IEI 0×05 contains source and destination port.
+	user_data.Append("04"); //IEDL. Content is 4 octets.
+
+	user_data.Append("0B84");//Destination port is 2948. This is the port for connectionless WSP.
+	user_data.Append("C002");
+	user_data.Append("00");//IEI 0×00 contains concatenation information
+	user_data.Append("03");//EIDL. Content is 3 octets.
+	user_data.Append("F0");//Reference number
+	user_data.Append("01");//Total 1 parts
+	user_data.Append("01");//This is the 1st (and only) part
+	srand(time(NULL));
+	int id = rand() % 100;
+	user_data.AppendFormat("%02X", id);
+	//user_data.append("0A"); //WSP transaction ID
+	user_data.Append("06");//This is a push PDU
+	user_data.Append("04");//Headers consist of 4 octets
+	user_data.Append("03");//Content type consists of 3 octets
+	user_data.Append("AE");//ontent type 0x2E: This stands for application/vnd.wap.sic (a WBXML encoded SI document)
+	user_data.Append("81");//Parameter name: 0×01 means ‘Charset‘
+	user_data.Append("EA");//Parameter value: 0x6A means ‘UTF-8‘
+	user_data.Append("02");//WBXML Version 1.2 	WBXML
+	user_data.Append("05"); //Document type -//WAPFORUM//DTD SI 1.0//EN
+	user_data.Append("6A");//Encoding UTF-8
+	user_data.Append("00");//String table length
+	user_data.Append("45");//<si> element with content
+	user_data.Append("C6");//<indication> element with attributes and content
+	user_data.Append("0C");//token for attribute ‘href’ and its value starting with ’http://’
+	user_data.Append("03");//Inline string follows
+	//char* pUrl = Utils::char2HexString(url);
+	user_data.Append(Utils::char2HexString(url).c_str()); //link
+
+	user_data.Append("00");// end of inline string
+	user_data.Append("0A");//token for attribute ‘created’
+	user_data.Append("C3");//	token for attribute ‘created’
+	user_data.Append("06");//	length of opaque data
+
+	user_data.Append("200902261625");//a GMT date-time value using hex 
+
+	user_data.Append("10");//	token for attribute ‘si-expires’
+	user_data.Append("C3"); //	opaque data follows
+	user_data.Append("06");//	length of opaque data
+
+	user_data.Append("200903041625"); //expire date
+	user_data.Append("01"); //end of <indication> attributes
+	user_data.Append("03");//	Inline string follows
+
+	//char* pText = Utils::char2HexString(text);
+	user_data.Append(Utils::char2HexString(text).c_str());
+	
+	user_data.Append("00");
+	user_data.Append("01");
+	user_data.Append("01");
+
+	int user_len = user_data.GetLength()/2;
+	pdu.AppendFormat("%02X", user_len);
+
+	std::string strUserData = CT2A(user_data);
+	pdu.Append(strUserData.c_str());
+
+	out_len = pdu.GetLength()/2 - 1;
+	
+	result = CT2A(pdu);
+	return  out_len;
+}
+
+int WAPPushPDU::getPDU(std::string dstNumber, std::string url, std::string text, CByteBuffer& buffer)
+{
+	int nLen = 0;
+	//CByteBuffer buffer;
+	BYTE header[] = {0x00, 0x41, 0x00};
+	buffer.AppendBytes(header, 3); //header
+	int numberLen = dstNumber.length();
+
+	//buffer.AppendInt(numberLen); //msisdn len
+	char hex_len[15] = {0};
+	//CBitEncoder::bintohex(hex_len, numberLen);
+	itoa(numberLen, hex_len, 16);
+	//buffer.AppendByte(hex_len[0]);
+	buffer.AppendByte(0x0B);
+	buffer.AppendByte(0x91); //	Destination is an international telephone number
+	//u8 msisdn[MAX_MSISDN_LEN] = {0};
+	/*int bcd_len = string2BCD(dstNumber, msisdn, MAX_MSISDN_LEN);
+	for(int k = 0; k < bcd_len; k++)
+		TRACE("%02x", msisdn[k]);
+		*/
+	BYTE msisdn[] = {0x48, 0x89, 0x75, 0x88, 0x53, 0xF5};
+	buffer.AppendBytes(msisdn, 6); //msisdn
+
+	buffer.AppendByte(0x00); //	Protocol identifier
+	buffer.AppendByte(0x04);//Date coding scheme. This value stands for ‘8 bit data’.
+
+	//ToDo: set user data length
+	
+	//buffer.AppendByte(0x5E); //user data length.
+
+
+	CByteBuffer user_data;
+	user_data.AppendByte(0x08);//User data header length is 11 octets
+	user_data.AppendByte(0x05);//IEI 0×05 contains source and destination port.
+	user_data.AppendByte(0x04); //IEDL. Content is 4 octets.
+
+	BYTE dstPort[] = {0x0B, 0x84};
+	user_data.AppendBytes(dstPort, 2);//Destination port is 2948. This is the port for connectionless WSP.
+
+	BYTE srcPort[] = {0xC0, 0x02};
+	user_data.AppendBytes(srcPort, 2);
+	user_data.AppendByte(0x00);//	IEI 0×00 contains concatenation information
+	user_data.AppendByte(0x03);//EIDL. Content is 3 octets.
+	user_data.AppendByte(0xF0);//	Reference number
+	user_data.AppendByte(0x01);//	Total 1 parts
+	user_data.AppendByte(0x01);//This is the 1st (and only) part
+
+	user_data.AppendByte(0x0B); //WSP transaction ID
+	user_data.AppendByte(0x06);//	This is a push PDU
+	user_data.AppendByte(0x04);//Headers consist of 4 octets
+	user_data.AppendByte(0x03);//	Content type consists of 3 octets
+	user_data.AppendByte(0xAE);//ontent type 0x2E: This stands for application/vnd.wap.sic (a WBXML encoded SI document)
+	user_data.AppendByte(0x81);//Parameter name: 0×01 means ‘Charset‘
+	user_data.AppendByte(0xEA);//	Parameter value: 0x6A means ‘UTF-8‘
+	user_data.AppendByte(0x02);//WBXML Version 1.2 	WBXML
+	user_data.AppendByte(0x05); //Document type -//WAPFORUM//DTD SI 1.0//EN
+	user_data.AppendByte(0x6A);//Encoding UTF-8
+	user_data.AppendByte(0x00);//	String table length
+	user_data.AppendByte(0x45);//<si> element with content
+	user_data.AppendByte(0xC6);//<indication> element with attributes and content
+	user_data.AppendByte(0x0C);//	token for attribute ‘href’ and its value starting with ’http://’
+	user_data.AppendByte(0x03);//	Inline string follows
+
+	BYTE urlData[] = {0x6D, 0x6F, 0x62, 0x69, 0x6C, 0x65, 0x74, 0x69, 0x64, 0x69, 0x6E, 0x67, 0x73, 0x2E, 0x63, 0x6F, 0x6D, 0x2F};
+	//BYTE urlData[MAX_TEXT_LEN] = {0};
+	//int url_len = char2HexString(url, urlData, MAX_TEXT_LEN);
+	user_data.AppendBytes(urlData, 18);
+	/*
+	for(int n = 0; n < url_len; n++)
+	{
+		TRACE("\n %02x ", urlData[n]);
+	}*/
+	user_data.AppendByte(0x00);// end of inline string
+	user_data.AppendByte(0x04);//token for attribute ‘created’
+	user_data.AppendByte(0xC3);//	token for attribute ‘created’
+	user_data.AppendByte(0x06);//	length of opaque data
+
+	BYTE datetime[] = {0x20, 0x09, 0x02, 0x26, 0x16, 0x25}; 
+	user_data.AppendBytes(datetime, 6);//a GMT date-time value using hex 
+
+	user_data.AppendByte(0x10);//	token for attribute ‘si-expires’
+	user_data.AppendByte(0xC3); //	opaque data follows
+	user_data.AppendByte(0x06);//	length of opaque data
+
+	BYTE expireDate[] = {	0x20, 0x09, 0x03, 0x04, 0x16, 0x25};
+	user_data.AppendBytes(expireDate, 6); //expire date
+	user_data.AppendByte(0x01); //end of <indication> attributes
+	user_data.AppendByte(0x03);//	Inline string follows
+
+	u8 textData[] = {0x43, 0x68, 0x65, 0x63, 0x6B, 0x20, 0x6F, 0x75, 0x74, 0x20, 0x4D, 0x6F, 0x62, 0x69, 0x6C, 0x65, 0x20, 0x54, 0x69, 0x64, 0x69, 0x6E, 0x67, 0x73, 0x21};
+	/*u8 textData[MAX_TEXT_LEN] = {0};
+	int text_len = char2HexString(text, textData, MAX_TEXT_LEN);
+	for(int n = 0; n < text_len; n++)
+	{
+		TRACE("\n %02x ", textData[n]);
+	}*/
+	user_data.AppendBytes(textData, 25);
+	
+	user_data.AppendByte(0x00);
+	user_data.AppendByte(0x01);
+	user_data.AppendByte(0x01);
+	int user_datalen = user_data.GetLength();
+	char user_data_hex[15] = {0};
+	//CBitEncoder::bintohex(user_data_hex, user_datalen);
+	itoa(user_datalen, user_data_hex, 16);
+	//buffer.AppendByte(user_data_hex[0]);
+	buffer.AppendByte(0x5E);
+	buffer.AppendBuffer(&user_data);
+	return buffer.GetLength();
+}
+
+int WAPPushPDU::char2HexString(std::string text, u8* output, int output_len)
+{
+	if(text.length() > output_len)
+		return 0;
+	int pos = 0;
+	for(int i=0; i< text.length(); i++)
+	{
+		char temp[5];
+		u8 hi = (text.at(i)>>4) & 0x0f;
+		u8 low = (text.at(i) & 0x0f);
+		u8 byte = hi << 4 | low;
+		output[pos++] = byte;
+	}
+
+	return pos;
+}
+
+int WAPPushPDU::string2BCD(std::string mobile, u8* output, int output_len)
+{
+	if(mobile.at(0) == '0')
+		mobile.replace(0, 1, "84");	
+	if(mobile.length() > MAX_MSISDN_LEN)
+		return 0;
+	int len = 0;
+	//if(mobile.length() % 2)
+		//mobile.append("F");
+
+	//std::string BCDmobile(mobile);
+
+	for(int i=0; i< mobile.length(); i+=2)
+	{
+		u8 hi;
+		if(i + 1 < mobile.length())
+		 hi = mobile.at(i+1);
+		else 
+			hi = 0x0f;
+		u8 low = mobile.at(i);
+		u8 byte = (hi & 0xf) << 4 | low & 0xf;
+		output[len++] = byte;
+	}
+
+	return len;
+}
+
+WAPPushPDU::~WAPPushPDU(void)
+{
+}
