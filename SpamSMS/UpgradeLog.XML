@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="SpamSMS">
+</Property><Property Name="Solution File" Value="D:\Works\SpamSMS\SpamSMS.sln">
+</Property><Property Name="User Options File" Value="D:\Works\SpamSMS\SpamSMS.suo">
+</Property><Property Name="Date" Value="Monday, January 07, 2013">
+</Property><Property Name="Time" Value="17:49 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="SpamSMS.sln" Description="File successfully backed up as D:\Works\SpamSMS\SpamSMS.sln.old">
+</Event><Event ErrorLevel="0" Project="" Source="SpamSMS.suo" Description="File successfully backed up as D:\Works\SpamSMS\SpamSMS.suo.old">
+</Event><Event ErrorLevel="0" Project="SpamSMS" Source="SpamSMS\SpamSMS.vcproj" Description="Converting project file 'D:\Works\SpamSMS\SpamSMS\SpamSMS.vcproj'.">
+</Event><Event ErrorLevel="1" Project="SpamSMS" Source="SpamSMS\SpamSMS.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="0" Project="SpamSMS" Source="SpamSMS\SpamSMS.vcproj" Description="Done converting to new project file 'D:\Works\SpamSMS\SpamSMS\SpamSMS.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="SpamSMS" Source="SpamSMS\SpamSMS.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="SpamSMS.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="SpamSMS.sln" Description="Converted">
+</Event></UpgradeLog>
